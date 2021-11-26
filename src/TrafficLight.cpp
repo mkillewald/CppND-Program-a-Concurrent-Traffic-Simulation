@@ -28,31 +28,11 @@ template <typename T> void MessageQueue<T>::send(T &&msg) {
 
 /* Implementation of class "TrafficLight" */
 
-TrafficLight::TrafficLight() {
-  _currentPhase = TrafficLightPhase::red;
-  setDuration();
-  setCycleStart();
-}
+TrafficLight::TrafficLight() { _currentPhase = TrafficLightPhase::red; }
 
 TrafficLightPhase TrafficLight::getCurrentPhase() { return _currentPhase; }
 void TrafficLight::setCurrentPhase(TrafficLightPhase phase) {
   _currentPhase = phase;
-}
-
-int64_t TrafficLight::getDuration() { return _duration; }
-void TrafficLight::setDuration() {
-  std::random_device rd;
-  std::mt19937 mt(rd());
-  std::uniform_int_distribution<int64_t> dist(4, 6);
-  _duration = dist(mt);
-}
-
-std::chrono::time_point<std::chrono::steady_clock>
-TrafficLight::getCycleStart() {
-  return _cycleStart;
-}
-void TrafficLight::setCycleStart() {
-  _cycleStart = std::chrono::steady_clock::now();
 }
 
 void TrafficLight::waitForGreen() {
@@ -60,7 +40,7 @@ void TrafficLight::waitForGreen() {
   // infinite while-loop runs and repeatedly calls the receive function on the
   // message queue. Once it receives TrafficLightPhase::green, the method
   // returns.
-  while (_messages.receive() == red) {
+  while (_messages.receive() == TrafficLightPhase::red) {
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
   }
 }
@@ -80,19 +60,25 @@ void TrafficLight::cycleThroughPhases() {
   // move semantics. The cycle duration should be a random value between 4 and 6
   // seconds. Also, the while-loop should use std::this_thread::sleep_for to
   // wait 1ms between two cycles.
-  while (true) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  std::uniform_int_distribution<int64_t> dist(6, 10);
+  auto randomDuration = dist(mt);
 
-    std::chrono::time_point<std::chrono::steady_clock> now =
-        std::chrono::steady_clock::now();
-    int64_t test =
-        std::chrono::duration_cast<std::chrono::seconds>(now - getCycleStart())
-            .count();
-    if (test >= getDuration()) {
+  std::chrono::time_point<std::chrono::steady_clock> cycleStart =
+      std::chrono::steady_clock::now();
+
+  while (true) {
+
+    auto timeSinceStart = std::chrono::duration_cast<std::chrono::seconds>(
+                              std::chrono::steady_clock::now() - cycleStart)
+                              .count();
+    if (timeSinceStart >= randomDuration) {
       getCurrentPhase() == red ? setCurrentPhase(green) : setCurrentPhase(red);
       _messages.send(std::move(getCurrentPhase()));
-      setDuration();
-      setCycleStart();
+
+      cycleStart = std::chrono::steady_clock::now();
     }
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
   }
 }

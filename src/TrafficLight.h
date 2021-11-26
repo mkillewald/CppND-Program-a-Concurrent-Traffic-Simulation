@@ -45,10 +45,6 @@ public:
   // getters / setters
   TrafficLightPhase getCurrentPhase();
   void setCurrentPhase(TrafficLightPhase phase);
-  std::chrono::time_point<std::chrono::steady_clock> getCycleStart();
-  void setCycleStart();
-  int64_t getDuration();
-  void setDuration();
 
   // typical behaviour methods
   void waitForGreen();
@@ -66,8 +62,6 @@ private:
   std::condition_variable _condition;
   std::mutex _mutex;
   TrafficLightPhase _currentPhase;
-  std::chrono::time_point<std::chrono::steady_clock> _cycleStart;
-  int64_t _duration;
 };
 
 #endif
