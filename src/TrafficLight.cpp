@@ -57,10 +57,10 @@ void TrafficLight::waitForGreen() {
 }
 
 void TrafficLight::simulate() {
-  // TODO: FP.2b : Finally, the private method „cycleThroughPhases“ should be
+  // FP.2b : Finally, the private method „cycleThroughPhases“ should be
   // started in a thread when the public method „simulate“ is called. To do
   // this, use the thread queue in the base class.
-  std::async(&TrafficLight::cycleThroughPhases, );
+  threads.emplace_back(std::thread(&TrafficLight::cycleThroughPhases, this));
 }
 
 // virtual function which is executed in a thread
