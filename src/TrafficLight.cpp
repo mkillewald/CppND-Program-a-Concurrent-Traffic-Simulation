@@ -43,7 +43,7 @@ int64_t TrafficLight::getDuration() { return _duration; }
 void TrafficLight::setDuration() {
   std::random_device rd;
   std::mt19937 mt(rd());
-  std::uniform_real_distribution<int64_t> dist(4, 6);
+  std::uniform_int_distribution<int64_t> dist(4, 6);
   _duration = dist(mt);
 }
 
