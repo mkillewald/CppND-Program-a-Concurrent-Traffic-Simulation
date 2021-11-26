@@ -2,6 +2,7 @@
 #define TRAFFICLIGHT_H
 
 #include "TrafficObject.h"
+#include <chrono>
 #include <condition_variable>
 #include <deque>
 #include <mutex>
@@ -28,15 +29,20 @@ private:
 // the private method „void cycleThroughPhases()“. Furthermore, there shall be
 // the private member _currentPhase which can take „red“ or „green“ as its
 // value.
+enum TrafficLightPhase { red, green };
 
 class TrafficLight : public TrafficObject {
 public:
-  enum TrafficLightPhase { red, green };
-
   // constructor / desctructor
+  TrafficLight();
 
   // getters / setters
   TrafficLightPhase getCurrentPhase();
+  void setCurrentPhase(TrafficLightPhase phase);
+  std::chrono::time_point<std::chrono::steady_clock> getCycleStart();
+  void setCycleStart();
+  int64_t getDuration();
+  void setDuration();
 
   // typical behaviour methods
   void waitForGreen();
@@ -50,10 +56,11 @@ private:
   // TrafficLightPhase and use it within the infinite loop to push each new
   // TrafficLightPhase into it by calling send in conjunction with move
   // semantics.
-
   std::condition_variable _condition;
   std::mutex _mutex;
   TrafficLightPhase _currentPhase;
+  std::chrono::time_point<std::chrono::steady_clock> _cycleStart;
+  int64_t _duration;
 };
 
 #endif
