@@ -42,7 +42,7 @@ void TrafficLight::simulate() {
 void TrafficLight::cycleThroughPhases() {
   std::random_device rd;
   std::mt19937 mt(rd());
-  std::uniform_int_distribution<int64_t> dist(6, 10);
+  std::uniform_int_distribution<int64_t> dist(4, 6);
   auto randomDuration = dist(mt);
 
   std::chrono::time_point<std::chrono::steady_clock> cycleStart =
