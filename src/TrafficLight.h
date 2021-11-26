@@ -17,26 +17,15 @@ class Vehicle;
 // Also, there should be an std::condition_variable as well as an std::mutex as
 // private members.
 
-class MessageQueue {
+template <class T> class MessageQueue {
 public:
-  TrafficLightPhase receive() {
-    std::unique_lock<std::mutex> uLock(_mutex);
-    _cond.wait(uLock, [this] { return !_queue.empty(); });
-    TrafficLightPhase phase = std::move(_queue.back());
-    _queue.pop_back();
-    return phase;
-  }
-
-  void send(TrafficLightPhase &&phase) {
-    std::lock_guard<std::mutex> uLock(_mutex);
-    _queue.push_back(std::move(phase));
-    _cond.notify_one();
-  }
+  T receive();
+  void send(T &&msg);
 
 private:
   std::mutex _mutex;
   std::condition_variable _cond;
-  std::deque<TrafficLightPhase> _queue;
+  std::deque<T> _queue;
 };
 
 // FP.1 : Define a class „TrafficLight“ which is a child class of TrafficObject.
