@@ -10,6 +10,11 @@ template <typename T> T MessageQueue<T>::receive() {
   // _condition.wait() to wait for and receive new messages and pull them from
   // the queue using move semantics. The received object should then be returned
   // by the receive function.
+  std::unique_lock<std::mutex> uLock(_mutex);
+  _cond.wait(uLock, [this] { return !_queue.empty(); });
+  T msg = std::move(_queue.back());
+  _queue.pop_back();
+  return msg;
 }
 
 template <typename T> void MessageQueue<T>::send(T &&msg) {
@@ -72,7 +77,6 @@ void TrafficLight::cycleThroughPhases() {
   // move semantics. The cycle duration should be a random value between 4 and 6
   // seconds. Also, the while-loop should use std::this_thread::sleep_for to
   // wait 1ms between two cycles.
-
   while (true) {
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
@@ -82,12 +86,8 @@ void TrafficLight::cycleThroughPhases() {
         std::chrono::duration_cast<std::chrono::seconds>(now - getCycleStart())
             .count();
     if (test >= getDuration()) {
-      // cycle phase
       getCurrentPhase() == red ? setCurrentPhase(green) : setCurrentPhase(red);
-
-      // TODO: send update method to message queue (using move semantics)
-
-      // set new _duration and reset _cycleStart
+      _messages.send(std::move(getCurrentPhase()));
       setDuration();
       setCycleStart();
     }
